@@ -14,11 +14,29 @@ class Quiz(models.Model):
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
+    question_number = models.SmallIntegerField()
     question = models.TextField()
-    answer = models.SmallIntegerField()
+
+    class Meta:
+        ordering = ("question_number",)
+    def __str__(self):
+        return str(self.question)
+
+class Choice(models.Model):
+    question = models.ForeignKey(Question, on_delete=models.CASCADE)
+    choice = models.CharField(max_length=50)
+    position = models.SmallIntegerField()
+    is_correct = models.BooleanField(default=False)
+
+    class Meta:
+        unique_together = [
+            # no duplicated choice per question
+            ("question", "choice"),
+        ]
+        ordering = ("position",)
 
     def __str__(self):
-        return self.question
+        return str(self.question)
 
 class QuizRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
