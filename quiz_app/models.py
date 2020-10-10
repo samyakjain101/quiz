@@ -20,16 +20,16 @@ class Question(models.Model):
     def __str__(self):
         return self.question
 
-class UQuiz(models.Model):
-    user = models.models.ForeignKey(User, on_delete=models.CASCADE)
-    quiz = models.models.ForeignKey(Quiz, on_delete=models.CASCADE)
+class QuizRecord(models.Model):
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     # start = models.DateTimeField() #when he started quiz
     
     def __str__(self):
-        return str(self.user + " attempt " + self.quiz)
+        return str(self.user)
 
-class UAns(models.Model):
-    uquiz = models.ForeignKey(UQuiz, on_delete=models.CASCADE)
+class QuizAnswerRecord(models.Model):
+    record = models.ForeignKey(QuizRecord, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     myAns = models.SmallIntegerField()
     MARK_FOR_REVIEW = 1                
@@ -42,4 +42,4 @@ class UAns(models.Model):
     
 
     def __str__(self):
-        return str((self.user + " ans"))
+        return str(self.user)
