@@ -36,20 +36,23 @@ class Choice(models.Model):
         ordering = ("position",)
 
     def __str__(self):
-        return str(self.question)
+        return str(self.choice)
 
 class QuizRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     # start = models.DateTimeField() #when he started quiz
-    
+    class Meta:
+        unique_together = [
+            ("user", "quiz"),
+        ]
     def __str__(self):
         return str(self.user)
 
 class QuizAnswerRecord(models.Model):
     record = models.ForeignKey(QuizRecord, on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    myAns = models.SmallIntegerField()
+    myAns = models.ForeignKey(Choice, on_delete=models.CASCADE)
     MARK_FOR_REVIEW = 1                
     DONT_MARK_FOR_REVIEW = 2   
     STATUS_CHOICES = (
@@ -58,6 +61,3 @@ class QuizAnswerRecord(models.Model):
     )
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=0)
     
-
-    def __str__(self):
-        return str(self.user)

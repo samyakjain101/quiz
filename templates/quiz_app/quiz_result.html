@@ -1,0 +1,14 @@
+{% extends "base.html" %}
+{% load static %}
+{% block css_block %} {% endblock %}
+
+{% block body_block %}
+    Quiz: {{ quiz.title }} <br>
+    Score: {{ score }} <br>
+    Total Questions: {{ total_questions }} <br>
+    Total Attempted: {{ total_attempted }} <br>
+
+{% endblock %}
+
+{% block java_script %}
+{% endblock %}

@@ -6,7 +6,7 @@
 
 {% if quizzes %}
     {% for quiz in quizzes %}
-        {{ quiz }}
+        {{ quiz }} <a href="{% url 'quiz_app:attempt_quiz' quiz_id=quiz.id %}">Attempt</a>
     {% endfor %}
 {% else %}  
     <p>No quiz available right now. Come back later.</p>

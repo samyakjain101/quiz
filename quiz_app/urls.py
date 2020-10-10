@@ -4,5 +4,7 @@ from .views import *
 app_name = 'quiz_app'
 
 urlpatterns = [
-    path('available_quiz/', AvailableQuiz.as_view(), name="available_quiz"),
+    path('quiz/available', AvailableQuiz.as_view(), name="available_quiz"),
+    path('quiz/check/<quiz_id>', attempt_quiz, name="attempt_quiz"),
+    path('quiz/result/<quiz_id>', QuizResult.as_view(), name="quiz_result"),
 ]
