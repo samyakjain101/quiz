@@ -24,15 +24,47 @@ def attempt_quiz(request, **kwargs):
     except ValueError:
         raise PermissionDenied()
 
+    try: 
+        quiz = Quiz.objects.get(id = quiz_id)
+    except Quiz.DoesNotExist:
+        raise PermissionDenied()
+
     #Check if user is attempting quiz first time.
     #If not PermissionDenied else create quiz object
-    obj, created = QuizRecord.objects.get_or_create(user=request.user, quiz=quiz_id)
+    obj, created = QuizRecord.objects.get_or_create(user=request.user, quiz=quiz)
     if created:
-        return redirect('view-name')
+        return redirect('quiz_app:live_quiz', quiz_id=quiz_id)
     else:
         return redirect('quiz_app:quiz_result', quiz_id=quiz_id)
 
-# class LiveQuiz(Te)
+class LiveQuiz(TemplateView):
+    template_name = "quiz_app/live_quiz.html"
+    def get_context_data(self, **kwargs):
+
+        try:
+            quiz_id = uuid.UUID(kwargs['quiz_id']).hex
+        except ValueError:
+            raise PermissionDenied()
+
+        try: 
+            quiz = Quiz.objects.get(id = quiz_id)
+        except Quiz.DoesNotExist:
+            raise PermissionDenied()
+
+        # Using Paginator
+
+        questions = quiz.question_set.all()
+        paginator = Paginator(questions, 1) # Show 1 question per page.
+
+        page_number = self.request.GET.get('page')
+        if not page_number:
+            page_number = 1
+        page_obj = paginator.get_page(page_number)
+
+        context = {
+            'page_obj' : page_obj,
+        }
+        return context
 
 class QuizResult(TemplateView):
     template_name = "quiz_app/quiz_result.html"
