@@ -8,13 +8,13 @@
         {% for choice in question.choice_set.all %}
             <div class="form-check">
                 <label class="form-check-label">
-                    <input type="radio" class="form-check-input" name="optradio">{{ choice }}
+                    <input type="radio" class="form-check-input" name="optradio" choice_id="{{ choice.id }}">{{ choice }}
                 </label>
             </div>
         {% endfor %}
         <button class="btn btn-primary btn-sm">Mark For Review</button>
         <button class="btn btn-primary btn-sm">Don't Mark For Review</button>
-        <button class="btn btn-primary btn-sm">Save & Next</button>
+        <button class="btn btn-primary btn-sm ajax-save-btn" url="{% url 'quiz_app:ajax_save_live_quiz' %}" question_id="{{ question.id }}">Save</button>
     {% endfor %}
 
     <div class="pagination">
@@ -37,4 +37,5 @@
 {% endblock %}
 
 {% block java_script %}
+<script src="{% static 'js/live_quiz.js' %}"></script>
 {% endblock %}

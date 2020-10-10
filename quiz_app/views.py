@@ -1,8 +1,10 @@
 import uuid
+import json
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
+from django.http import HttpResponse
 from django.utils import timezone
 from .models import *
 # Create your views here.
@@ -96,3 +98,34 @@ class QuizResult(TemplateView):
             pass
 
         return context
+
+def save_answer(request):
+    jsonr = {}
+    if request.is_ajax():
+        current_user = request.user
+        question_id = request.GET.get('question_id')
+        choice_id = request.GET.get('choice_id')
+        try:
+            question = Question.objects.get(id=question_id)
+            choice = Choice.objects.get(id=choice_id)
+            quiz_record = QuizRecord.objects.get(user=current_user, quiz=question.quiz)
+
+        except Question.DoesNotExist or Choice.DoesNotExist or QuizRecord.DoesNotExist:
+            raise PermissionDenied()
+        
+        try:
+            quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
+            # Update Answer
+            quiz.myAns = choice
+            quiz.save()
+            jsonr['message'] = "Choice Updated"
+        except QuizAnswerRecord.DoesNotExist:
+            QuizAnswerRecord.objects.create(
+                record=quiz_record, 
+                question=question,
+                myAns=choice,
+                status=QuizAnswerRecord.DONT_MARK_FOR_REVIEW
+            )
+            jsonr['message'] = "Your response is saved"
+            
+    return HttpResponse(json.dumps(jsonr), content_type='application/json')

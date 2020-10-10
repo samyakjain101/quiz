@@ -50,7 +50,7 @@ class QuizRecord(models.Model):
         return str(self.user)
 
 class QuizAnswerRecord(models.Model):
-    record = models.ForeignKey(QuizRecord, on_delete=models.CASCADE)
+    record =  models.ForeignKey(QuizRecord,on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     myAns = models.ForeignKey(Choice, on_delete=models.CASCADE)
     MARK_FOR_REVIEW = 1                
@@ -60,4 +60,7 @@ class QuizAnswerRecord(models.Model):
         (DONT_MARK_FOR_REVIEW, 'Dont mark for review'),
     )
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=0)
-    
+    class Meta:
+        unique_together = [
+            ("record", "question"),
+        ]
