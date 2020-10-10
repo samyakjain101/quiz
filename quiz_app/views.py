@@ -66,6 +66,14 @@ class LiveQuiz(TemplateView):
         context = {
             'page_obj' : page_obj,
         }
+
+        try:
+            record = QuizRecord.objects.get(user=self.request.user, quiz = page_obj.object_list[0].quiz)
+            answer = QuizAnswerRecord.objects.get(record = record, question = page_obj.object_list[0]).myAns
+            context['answer'] = answer
+        except QuizRecord.DoesNotExist or QuizAnswerRecord.DoesNotExist:
+            pass
+        
         return context
 
 class QuizResult(TemplateView):
