@@ -1,0 +1,4 @@
+quiz_app/migrations
+quiz_app/__pycache__
+Quiz/__pycache__
+db.sqlite3
