@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+{% load static %}
+{% block css_block %} {% endblock %}
+
+{% block body_block %}
+
+{% if quizzes %}
+    {% for quiz in quizzes %}
+        {{ quiz }}
+    {% endfor %}
+{% else %}  
+    <p>No quiz available right now. Come back later.</p>
+{% endif %}
+
+{% endblock body_block %}
+
+{% block java_script %}
+{% endblock %}
