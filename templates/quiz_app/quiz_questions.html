@@ -58,8 +58,7 @@
                 <button class="btn btn-info quitbtn ajax-save-mark" url="{% url 'quiz_app:ajax_save_live_quiz' %}" to_do="markForReview" onclick="mark(document.getElementById('qno').innerHTML)">Mark for
                     Review</button>
                 <button class="btn quitbtn skipbtn ajax-btn-page-direct"
-                    {% if page_obj.has_previous %}url="?page=1"{% endif %}
-                    {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% endif %}>Skip</button>
+                    {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %}>Skip</button>
             </div>
             <div class="col-lg-3" style="overflow-y: scroll;">
                 <a class="btn btn-success quitbtn" href="{% url 'quiz_app:quiz_result' quiz_id=page_obj.0.quiz.id %}">Submit</a>

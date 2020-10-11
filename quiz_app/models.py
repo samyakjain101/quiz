@@ -1,6 +1,7 @@
 import uuid
 from django.db import models
 from django.contrib.auth.models import User
+from django.db.models.signals import pre_save
 
 # Create your models here.
 class Quiz(models.Model):
@@ -54,10 +55,10 @@ class QuizAnswerRecord(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     myAns = models.ForeignKey(Choice, on_delete=models.CASCADE, blank=True, null=True)
     MARK_FOR_REVIEW = 1                
-    DONT_MARK_FOR_REVIEW = 2   
+    SAVE_AND_NEXT = 2   
     STATUS_CHOICES = (
         (MARK_FOR_REVIEW, 'Mark for review'),
-        (DONT_MARK_FOR_REVIEW, 'Dont mark for review'),
+        (SAVE_AND_NEXT, 'Save & Next'),
     )
     status = models.SmallIntegerField(choices=STATUS_CHOICES, default=0)
     class Meta:

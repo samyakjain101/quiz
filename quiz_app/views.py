@@ -55,7 +55,7 @@ class LiveQuiz(TemplateView):
 
         # Using Paginator
 
-        questions = quiz.question_set.all()
+        questions = quiz.question_set.all().order_by('question_number')
         paginator = Paginator(questions, 1) # Show 1 question per page.
 
         page_number = self.request.GET.get('page')
@@ -100,7 +100,7 @@ class QuizResult(TemplateView):
             total_questions = record.quiz.question_set.all().count()
             for r in record.quizanswerrecord_set.all():
                 total_attempted += 1 
-                if r.myAns.is_correct:
+                if r.myAns and r.myAns.is_correct:
                     score += 1
 
             context['quiz'] = quiz
@@ -137,6 +137,7 @@ def save_answer(request):
 
             if to_do == "saveAndNext":
                 jsonr['message'] = "Choice Updated"
+                quiz.status = QuizAnswerRecord.SAVE_AND_NEXT
             elif to_do == "markForReview":
                 quiz.status = QuizAnswerRecord.MARK_FOR_REVIEW
                 jsonr['message'] = "Marked For Review"
@@ -147,7 +148,7 @@ def save_answer(request):
         except QuizAnswerRecord.DoesNotExist:
             if to_do == "saveAndNext":
                 jsonr['message'] = "Your response is saved"
-                status = QuizAnswerRecord.DONT_MARK_FOR_REVIEW
+                status = QuizAnswerRecord.SAVE_AND_NEXT
             elif to_do == "markForReview":
                 jsonr['message'] = "Marked For Review"
                 status = QuizAnswerRecord.MARK_FOR_REVIEW
