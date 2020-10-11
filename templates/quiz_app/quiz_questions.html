@@ -33,7 +33,6 @@
                         </p>
                     {% endfor %}
                 {% endfor %}
-             {% if status == 1 %} Marked for review {% endif %}
             </div>
             <div class="col-lg-3" style="overflow-y: scroll;">
                 <p id="totalq" style="display:none;">15</p>
@@ -46,8 +45,8 @@
                     {% endfor %}
                     {% endfor %}
                     {% endwith %} -->
-                    {% for p in allPages %}
-                        <button class="btn btn-danger ajax-btn-page-direct" url="?page={{ p }}">{{ p }}</button>
+                    {% for status in all_status %}
+                        <button class="btn ajax-btn-page-direct {% if status == 0 %}btn-warning{% elif status == 1 %}btn-info{% else %}btn-success{% endif %}" url="?page={{ forloop.counter }}">{{ forloop.counter }}</button>        
                     {% endfor %}
                 </div>
             </div>

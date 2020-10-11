@@ -70,13 +70,16 @@ class LiveQuiz(TemplateView):
         try:
             record = QuizRecord.objects.get(user=self.request.user, quiz = page_obj.object_list[0].quiz)
             answer = QuizAnswerRecord.objects.get(record = record, question = page_obj.object_list[0]).myAns
-            status = QuizAnswerRecord.objects.get(record = record, question = page_obj.object_list[0]).status
             context['answer'] = answer
-            context['status'] = status
         except (QuizRecord.DoesNotExist, QuizAnswerRecord.DoesNotExist):
             #If this exception is called this means user has not answered this question till now.
             #Do nothing
             pass
+
+        all_status = [0]*questions.count()
+        for x in QuizAnswerRecord.objects.filter(record = record).order_by("question__question_number"):
+            all_status[x.question.question_number - 1] = x.status
+        context['all_status'] = all_status
         
         return context
 
