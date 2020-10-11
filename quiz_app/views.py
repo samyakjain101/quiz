@@ -32,7 +32,7 @@ def attempt_quiz(request, **kwargs):
         raise PermissionDenied()
 
     #Check if user is attempting quiz first time.
-    #If not PermissionDenied else create quiz object
+    #If not then redirect to results else create quiz object
     obj, created = QuizRecord.objects.get_or_create(user=request.user, quiz=quiz)
     if created:
         return redirect('quiz_app:live_quiz', quiz_id=quiz_id)
@@ -74,6 +74,8 @@ class LiveQuiz(TemplateView):
             context['answer'] = answer
             context['status'] = status
         except (QuizRecord.DoesNotExist, QuizAnswerRecord.DoesNotExist):
+            #If this exception is called this means user has not answered this question till now.
+            #Do nothing
             pass
         
         return context
@@ -103,9 +105,8 @@ class QuizResult(TemplateView):
             context['total_attempted'] = total_attempted
             context['total_questions'] = total_questions
 
-        except Quiz.DoesNotExist or QuizRecord.DoesNotExist:
-            print("Something does not exist")
-            pass
+        except (Quiz.DoesNotExist, QuizRecord.DoesNotExist):
+            raise PermissionDenied()
 
         return context
 
@@ -119,12 +120,15 @@ def save_answer(request):
         
         try:
             question = Question.objects.get(id=question_id)
-            choice = Choice.objects.get(id=choice_id)
+            if choice_id:   
+                choice = Choice.objects.get(id=choice_id)
+            else:
+                choice = None
             quiz_record = QuizRecord.objects.get(user=current_user, quiz=question.quiz)
 
         except (Question.DoesNotExist, Choice.DoesNotExist, QuizRecord.DoesNotExist):
             raise PermissionDenied()
-        
+
         try:
             quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
 
@@ -144,6 +148,7 @@ def save_answer(request):
             elif to_do == "markForReview":
                 jsonr['message'] = "Marked For Review"
                 status = QuizAnswerRecord.MARK_FOR_REVIEW
+
             QuizAnswerRecord.objects.create(
                 record=quiz_record, 
                 question=question,
