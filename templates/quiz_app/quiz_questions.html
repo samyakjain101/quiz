@@ -1,0 +1,123 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block css_block %}
+<link rel="stylesheet" href="{% static 'css/quiz_live.css' %}">
+{% endblock %}
+{% block body_block %}
+
+<section style="padding-bottom:0px; padding-top:48px;">
+    <div id="ajax-main-container" style=" padding: 0px;">
+        <div class="row quizheader">
+            <div class="col-lg-9" style="border-right: 1px solid black;">
+                <p class="quizheadtext floatleft">{{ page_obj.0.quiz.title }}</p>
+                <p class="quizheadtext floatright">
+                    Total Marks: 100
+                </p>
+            </div>
+            <div class="col-lg-3">
+                <p class="quiz-time floatleft">
+                    <span class="bx bx-time"> 00:20:10</span>
+                </p>
+                <button class="btn btn-danger quitbtn">Quit</button>
+            </div>
+        </div>
+        <div class="row" style="height:100%;">
+            <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:8%;">
+                {% for question in page_obj %}
+                    <p class="quiztext ajax-question-container" question_id="{{ question.id }}">
+                        Q <span id="qno">1</span>. {{ question.question }}
+                    </p>
+                    {% for choice in question.choice_set.all %}
+                        <p class="quiztext">
+                            <input {% if answer.id == choice.id %}checked{% endif %} type="radio" name="optradio" choice_id="{{ choice.id }}">{{ choice }}
+                        </p>
+                    {% endfor %}
+                {% endfor %}
+
+            </div>
+            <div class="col-lg-3" style="overflow-y: scroll;">
+                <p id="totalq" style="display:none;">15</p>
+                <div class="row" style="padding:5px;">
+                    <!-- {% with ''|center:15 as range %}
+                    {% for i in range %}
+                    {% for column in i %}
+                    <div class="questiontag" onclick="showq({{forloop.parentloop.counter}})"
+                        id="q{{forloop.parentloop.counter}}">{{forloop.parentloop.counter}}</div>
+                    {% endfor %}
+                    {% endfor %}
+                    {% endwith %} -->
+                    {% for p in allPages %}
+                        <button class="btn btn-danger ajax-btn-page-direct" url="?page={{ p }}">{{ p }}</button>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+        <div class="row" style="height:100%; border-bottom: 1px solid black;">
+            <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:15px;">
+                <button class="btn btn-success quitbtn ajax-save-and-next" to_do="" onclick="save(document.getElementById('qno').innerHTML)">Save &
+                    Next</button>
+                <button class="btn btn-info quitbtn" onclick="mark(document.getElementById('qno').innerHTML)">Mark for
+                    Later</button>
+                <button class="btn quitbtn skipbtn"
+                    onclick="skp(document.getElementById('qno').innerHTML)">Skip</button>
+            </div>
+            <div class="col-lg-3" style="overflow-y: scroll;">
+                <button class="btn btn-success quitbtn">Submit</button>
+            </div>
+        </div>
+    </div>
+</section>
+
+<script src="{% static 'vendor/ajax/jquery.min.js' %}"></script>
+<script type="text/javascript">
+    var total = document.getElementById("totalq").innerHTML;
+    $(document).ready(function () {
+        n = document.getElementById("qno").innerHTML;
+        $('#q1').css({ "opacity": "0.5" });
+    })
+    function save(v) {
+        $('#q' + v).css({ "color": "white", "background-color": "#198531" });
+        n = parseInt(v) + 1
+        if (n > total) {
+            n = 1;
+        }
+        n = n.toString()
+        document.getElementById("qno").innerHTML = n;
+        $('.questiontag').css({ "opacity": "1" });
+        $('#q' + n).css({ "opacity": "0.5" });
+    }
+    function mark(v) {
+        $('#q' + v).css({ "color": "white", "background-color": "#06809B" });
+        n = parseInt(v) + 1
+        if (n > total) {
+            n = 1;
+        }
+        n = n.toString()
+        document.getElementById("qno").innerHTML = n;
+        $('.questiontag').css({ "opacity": "1" });
+        $('#q' + n).css({ "opacity": "0.5" });
+    }
+    function skp(v) {
+        $('#q' + v).css({ "color": "white", "background-color": "#76767B" });
+        n = parseInt(v) + 1
+        if (n > total) {
+            n = 1;
+        }
+        n = n.toString()
+        document.getElementById("qno").innerHTML = n;
+        $('.questiontag').css({ "opacity": "1" });
+        $('#q' + n).css({ "opacity": "0.5" });
+    }
+    function showq(n) {
+        document.getElementById("qno").innerHTML = n;
+        $('.questiontag').css({ "opacity": "1" });
+        $('#q' + n).css({ "opacity": "0.5" });
+    }
+
+</script>
+
+{% endblock body_block %}
+
+{% block java_script %}
+<script src="{% static 'js/live_quiz.js' %}"></script>
+{% endblock %}

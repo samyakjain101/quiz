@@ -40,7 +40,7 @@ def attempt_quiz(request, **kwargs):
         return redirect('quiz_app:quiz_result', quiz_id=quiz_id)
 
 class LiveQuiz(TemplateView):
-    template_name = "quiz_app/live_quiz.html"
+    template_name = "quiz_app/quiz_questions.html"
     def get_context_data(self, **kwargs):
 
         try:
@@ -116,62 +116,39 @@ def save_answer(request):
         current_user = request.user
         to_do = request.GET.get('to_do')
         question_id = request.GET.get('question_id')
-        if to_do == "updateAns":
-            choice_id = request.GET.get('choice_id')
+        choice_id = request.GET.get('choice_id')
         
         try:
             question = Question.objects.get(id=question_id)
-            if to_do == "updateAns":
-                choice = Choice.objects.get(id=choice_id)
+            choice = Choice.objects.get(id=choice_id)
             quiz_record = QuizRecord.objects.get(user=current_user, quiz=question.quiz)
 
-        except Question.DoesNotExist or Choice.DoesNotExist or QuizRecord.DoesNotExist:
+        except (Question.DoesNotExist, Choice.DoesNotExist, QuizRecord.DoesNotExist):
             raise PermissionDenied()
         
-        if to_do == "updateAns":
-            try:
-                quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
-                # Update Answer
+        try:
+            quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
+            if to_do == "updateAns":
                 quiz.myAns = choice
-                quiz.save()
                 jsonr['message'] = "Choice Updated"
-            except QuizAnswerRecord.DoesNotExist:
-                QuizAnswerRecord.objects.create(
-                    record=quiz_record, 
-                    question=question,
-                    myAns=choice,
-                    status=QuizAnswerRecord.DONT_MARK_FOR_REVIEW
-                )
-                jsonr['message'] = "Your response is saved"
-        
-        elif to_do == "markForReview":
-            try:
-                quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
-                # Mark For Review
+            elif to_do == "markForReview":
                 quiz.status = QuizAnswerRecord.MARK_FOR_REVIEW
-                quiz.save()
-                jsonr['message'] = "Mark For Review"
-            except QuizAnswerRecord.DoesNotExist:
-                QuizAnswerRecord.objects.create(
-                    record=quiz_record, 
-                    question=question,
-                    status=QuizAnswerRecord.MARK_FOR_REVIEW
-                )
-                jsonr['message'] = "last question marked for review"
-        
-        elif to_do == "dontMarkForReview":
-            try:
-                quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
-                # Mark For Review
+                jsonr['message'] = "Marked For Review"
+            elif to_do == "dontMarkForReview":
                 quiz.status = QuizAnswerRecord.DONT_MARK_FOR_REVIEW
-                quiz.save()
-                jsonr['message'] = "Dont Mark For Review"
-            except QuizAnswerRecord.DoesNotExist:
-                QuizAnswerRecord.objects.create(
-                    record=quiz_record, 
-                    question=question,
-                    status=QuizAnswerRecord.DONT_MARK_FOR_REVIEW
-                )
+            quiz.save()
+        except QuizAnswerRecord.DoesNotExist:
+            QuizAnswerRecord.objects.create(
+                record=quiz_record, 
+                question=question,
+                myAns=choice,
+                status=QuizAnswerRecord.DONT_MARK_FOR_REVIEW
+            )
+            if to_do == "updateAns":
+                jsonr['message'] = "Your response is saved"
+            elif to_do == "markForReview":
+                jsonr['message'] = "last question marked for review"
+            elif to_do == "dontMarkForReview":
                 jsonr['message'] = "last question dont marked for review"
         
     return HttpResponse(json.dumps(jsonr), content_type='application/json')

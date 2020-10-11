@@ -52,7 +52,7 @@ class QuizRecord(models.Model):
 class QuizAnswerRecord(models.Model):
     record =  models.ForeignKey(QuizRecord,on_delete=models.CASCADE)
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
-    myAns = models.ForeignKey(Choice, on_delete=models.CASCADE, blank=True)
+    myAns = models.ForeignKey(Choice, on_delete=models.CASCADE, blank=True, null=True)
     MARK_FOR_REVIEW = 1                
     DONT_MARK_FOR_REVIEW = 2   
     STATUS_CHOICES = (
