@@ -11,21 +11,21 @@
             <div class="col-lg-9" style="border-right: 1px solid black;">
                 <p class="quizheadtext floatleft">{{ page_obj.0.quiz.title }}</p>
                 <p class="quizheadtext floatright">
-                    Total Marks: 100
+                    Total Marks: {{ page_obj.paginator.num_pages }}
                 </p>
             </div>
             <div class="col-lg-3">
                 <p class="quiz-time floatleft">
                     <span class="bx bx-time"> 00:20:10</span>
                 </p>
-                <button class="btn btn-danger quitbtn">Quit</button>
+                <a class="btn btn-danger quitbtn" href="{% url 'quiz_app:quiz_result' quiz_id=page_obj.0.quiz.id %}">Quit</a>
             </div>
         </div>
         <div class="row" style="height:100%;">
             <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:8%;">
                 {% for question in page_obj %}
                     <p class="quiztext ajax-question-container" question_id="{{ question.id }}">
-                        Q <span id="qno">1</span>. {{ question.question }}
+                        Q <span>{{ question.question_number }}</span>. {{ question.question }}
                     </p>
                     {% for choice in question.choice_set.all %}
                         <p class="quiztext">
@@ -54,22 +54,27 @@
         </div>
         <div class="row" style="height:100%; border-bottom: 1px solid black;">
             <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:15px;">
-                <button class="btn btn-success quitbtn ajax-save-and-next" to_do="" onclick="save(document.getElementById('qno').innerHTML)">Save &
+                <button class="btn btn-success quitbtn ajax-save-mark" url="{% url 'quiz_app:ajax_save_live_quiz' %}" to_do="saveAndNext" onclick="save(document.getElementById('qno').innerHTML)">Save &
                     Next</button>
-                <button class="btn btn-info quitbtn" onclick="mark(document.getElementById('qno').innerHTML)">Mark for
-                    Later</button>
-                <button class="btn quitbtn skipbtn"
-                    onclick="skp(document.getElementById('qno').innerHTML)">Skip</button>
+                <button class="btn btn-info quitbtn ajax-save-mark" url="{% url 'quiz_app:ajax_save_live_quiz' %}" to_do="markForReview" onclick="mark(document.getElementById('qno').innerHTML)">Mark for
+                    Review</button>
+                <button class="btn quitbtn skipbtn ajax-btn-page-direct"
+                    {% if page_obj.has_previous %}url="?page=1"{% endif %}
+                    {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% endif %}>Skip</button>
             </div>
             <div class="col-lg-3" style="overflow-y: scroll;">
-                <button class="btn btn-success quitbtn">Submit</button>
+                <a class="btn btn-success quitbtn" href="{% url 'quiz_app:quiz_result' quiz_id=page_obj.0.quiz.id %}">Submit</a>
             </div>
         </div>
     </div>
 </section>
 
-<script src="{% static 'vendor/ajax/jquery.min.js' %}"></script>
-<script type="text/javascript">
+<!-- <script src="{% static 'vendor/ajax/jquery.min.js' %}"></script> -->
+
+{% endblock body_block %}
+
+{% block java_script %}
+<!-- <script type="text/javascript">
     var total = document.getElementById("totalq").innerHTML;
     $(document).ready(function () {
         n = document.getElementById("qno").innerHTML;
@@ -114,10 +119,6 @@
         $('#q' + n).css({ "opacity": "0.5" });
     }
 
-</script>
-
-{% endblock body_block %}
-
-{% block java_script %}
+</script> -->
 <script src="{% static 'js/live_quiz.js' %}"></script>
 {% endblock %}

@@ -62,7 +62,6 @@ class LiveQuiz(TemplateView):
         if not page_number:
             page_number = 1
         page_obj = paginator.get_page(page_number)
-
         context = {
             'page_obj' : page_obj,
             'allPages' : paginator.page_range,
@@ -128,27 +127,28 @@ def save_answer(request):
         
         try:
             quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
-            if to_do == "updateAns":
-                quiz.myAns = choice
+
+            if to_do == "saveAndNext":
                 jsonr['message'] = "Choice Updated"
             elif to_do == "markForReview":
                 quiz.status = QuizAnswerRecord.MARK_FOR_REVIEW
                 jsonr['message'] = "Marked For Review"
-            elif to_do == "dontMarkForReview":
-                quiz.status = QuizAnswerRecord.DONT_MARK_FOR_REVIEW
+
+            quiz.myAns = choice
             quiz.save()
+
         except QuizAnswerRecord.DoesNotExist:
+            if to_do == "saveAndNext":
+                jsonr['message'] = "Your response is saved"
+                status = QuizAnswerRecord.DONT_MARK_FOR_REVIEW
+            elif to_do == "markForReview":
+                jsonr['message'] = "Marked For Review"
+                status = QuizAnswerRecord.MARK_FOR_REVIEW
             QuizAnswerRecord.objects.create(
                 record=quiz_record, 
                 question=question,
                 myAns=choice,
-                status=QuizAnswerRecord.DONT_MARK_FOR_REVIEW
+                status=status
             )
-            if to_do == "updateAns":
-                jsonr['message'] = "Your response is saved"
-            elif to_do == "markForReview":
-                jsonr['message'] = "last question marked for review"
-            elif to_do == "dontMarkForReview":
-                jsonr['message'] = "last question dont marked for review"
         
     return HttpResponse(json.dumps(jsonr), content_type='application/json')
