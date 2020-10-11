@@ -4,7 +4,7 @@
 
 {% block body_block %}
 <div class="container">
-    <div class="main-container">
+    <div id="main-container">
         {% for question in page_obj %}
         {{question}} <br>
         {% for choice in question.choice_set.all %}
@@ -15,10 +15,13 @@
             </label>
         </div>
         {% endfor %}
-        <button class="btn btn-primary btn-sm">Mark For Review</button>
-        <button class="btn btn-primary btn-sm">Don't Mark For Review</button>
+        {% if status == 1 %} Marked for review {% endif %}
+        <button class="btn btn-primary btn-sm ajax-markReview-btn" url="{% url 'quiz_app:ajax_save_live_quiz' %}"
+            question_id="{{ question.id }}" to_do="markForReview">Mark For Review</button>
+        <button class="btn btn-primary btn-sm ajax-dontReview-btn" url="{% url 'quiz_app:ajax_save_live_quiz' %}"
+            question_id="{{ question.id }}" to_do="dontMarkForReview">Don't Mark For Review</button>
         <button class="btn btn-primary btn-sm ajax-save-btn" url="{% url 'quiz_app:ajax_save_live_quiz' %}"
-            question_id="{{ question.id }}">Save</button>
+            question_id="{{ question.id }}" to_do="updateAns">Save</button>
         {% endfor %}
         
         <div class="pagination">
@@ -41,7 +44,16 @@
             </span>
         </div>
     </div>
+
 </div>
+<br><br><br>
+<div class="container">
+    <div id="page-container">
+    {% for p in allPages %}
+            <button class="btn btn-danger btn-sm ajax-btn-page-direct" url="?page={{ p }}">{{ p }}</button>
+    {% endfor %}
+    </div>    
+<div>
 {% endblock %}
 
 {% block java_script %}

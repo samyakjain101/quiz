@@ -65,13 +65,16 @@ class LiveQuiz(TemplateView):
 
         context = {
             'page_obj' : page_obj,
+            'allPages' : paginator.page_range,
         }
 
         try:
             record = QuizRecord.objects.get(user=self.request.user, quiz = page_obj.object_list[0].quiz)
             answer = QuizAnswerRecord.objects.get(record = record, question = page_obj.object_list[0]).myAns
+            status = QuizAnswerRecord.objects.get(record = record, question = page_obj.object_list[0]).status
             context['answer'] = answer
-        except QuizRecord.DoesNotExist or QuizAnswerRecord.DoesNotExist:
+            context['status'] = status
+        except (QuizRecord.DoesNotExist, QuizAnswerRecord.DoesNotExist):
             pass
         
         return context
@@ -111,29 +114,64 @@ def save_answer(request):
     jsonr = {}
     if request.is_ajax():
         current_user = request.user
+        to_do = request.GET.get('to_do')
         question_id = request.GET.get('question_id')
-        choice_id = request.GET.get('choice_id')
+        if to_do == "updateAns":
+            choice_id = request.GET.get('choice_id')
+        
         try:
             question = Question.objects.get(id=question_id)
-            choice = Choice.objects.get(id=choice_id)
+            if to_do == "updateAns":
+                choice = Choice.objects.get(id=choice_id)
             quiz_record = QuizRecord.objects.get(user=current_user, quiz=question.quiz)
 
         except Question.DoesNotExist or Choice.DoesNotExist or QuizRecord.DoesNotExist:
             raise PermissionDenied()
         
-        try:
-            quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
-            # Update Answer
-            quiz.myAns = choice
-            quiz.save()
-            jsonr['message'] = "Choice Updated"
-        except QuizAnswerRecord.DoesNotExist:
-            QuizAnswerRecord.objects.create(
-                record=quiz_record, 
-                question=question,
-                myAns=choice,
-                status=QuizAnswerRecord.DONT_MARK_FOR_REVIEW
-            )
-            jsonr['message'] = "Your response is saved"
-            
+        if to_do == "updateAns":
+            try:
+                quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
+                # Update Answer
+                quiz.myAns = choice
+                quiz.save()
+                jsonr['message'] = "Choice Updated"
+            except QuizAnswerRecord.DoesNotExist:
+                QuizAnswerRecord.objects.create(
+                    record=quiz_record, 
+                    question=question,
+                    myAns=choice,
+                    status=QuizAnswerRecord.DONT_MARK_FOR_REVIEW
+                )
+                jsonr['message'] = "Your response is saved"
+        
+        elif to_do == "markForReview":
+            try:
+                quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
+                # Mark For Review
+                quiz.status = QuizAnswerRecord.MARK_FOR_REVIEW
+                quiz.save()
+                jsonr['message'] = "Mark For Review"
+            except QuizAnswerRecord.DoesNotExist:
+                QuizAnswerRecord.objects.create(
+                    record=quiz_record, 
+                    question=question,
+                    status=QuizAnswerRecord.MARK_FOR_REVIEW
+                )
+                jsonr['message'] = "last question marked for review"
+        
+        elif to_do == "dontMarkForReview":
+            try:
+                quiz = QuizAnswerRecord.objects.get(record=quiz_record, question=question)
+                # Mark For Review
+                quiz.status = QuizAnswerRecord.DONT_MARK_FOR_REVIEW
+                quiz.save()
+                jsonr['message'] = "Dont Mark For Review"
+            except QuizAnswerRecord.DoesNotExist:
+                QuizAnswerRecord.objects.create(
+                    record=quiz_record, 
+                    question=question,
+                    status=QuizAnswerRecord.DONT_MARK_FOR_REVIEW
+                )
+                jsonr['message'] = "last question dont marked for review"
+        
     return HttpResponse(json.dumps(jsonr), content_type='application/json')
