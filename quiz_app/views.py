@@ -18,8 +18,51 @@ class AvailableQuiz(TemplateView):
         }
         return context
 
-def attempt_quiz(request, **kwargs):
+# class LiveQuiz(TemplateView):
+#     template_name = "quiz_app/quiz_questions.html"
+#     def get_context_data(self, **kwargs):
 
+#         try:
+#             quiz_id = uuid.UUID(kwargs['quiz_id']).hex
+#         except ValueError:
+#             raise PermissionDenied()
+
+#         try: 
+#             quiz = Quiz.objects.get(id = quiz_id)
+#         except Quiz.DoesNotExist:
+#             raise PermissionDenied()
+
+#         # Using Paginator
+
+#         questions = quiz.question_set.all().order_by('question_number')
+#         paginator = Paginator(questions, 1) # Show 1 question per page.
+
+#         page_number = self.request.GET.get('page')
+#         if not page_number:
+#             page_number = 1
+#         page_obj = paginator.get_page(page_number)
+#         context = {
+#             'page_obj' : page_obj,
+#             'allPages' : paginator.page_range,
+#         }
+
+#         try:
+#             record = QuizRecord.objects.get(user=self.request.user, quiz = page_obj.object_list[0].quiz)
+#             answer = QuizAnswerRecord.objects.get(record = record, question = page_obj.object_list[0]).myAns
+#             context['answer'] = answer
+#         except (QuizRecord.DoesNotExist, QuizAnswerRecord.DoesNotExist):
+#             #If this exception is called this means user has not answered this question till now.
+#             #Do nothing
+#             pass
+
+#         all_status = [0]*questions.count()
+#         for x in QuizAnswerRecord.objects.filter(record = record).order_by("question__question_number"):
+#             all_status[x.question.question_number - 1] = x.status
+#         context['all_status'] = all_status
+        
+#         return context
+
+def attempt_quiz(request, **kwargs):
     # Check if quiz_id is valid uuid 
     try:
         quiz_id = uuid.UUID(kwargs['quiz_id']).hex
@@ -32,56 +75,34 @@ def attempt_quiz(request, **kwargs):
         raise PermissionDenied()
 
     #Check if user is attempting quiz first time.
-    #If not then redirect to results else create quiz object
+    #If not Permission Denied.
     obj, created = QuizRecord.objects.get_or_create(user=request.user, quiz=quiz)
     if created:
-        return redirect('quiz_app:live_quiz', quiz_id=quiz_id)
+        QuizAnswerRecord.objects.bulk_create(
+            [QuizAnswerRecord(record = obj, question = x) for x in quiz.question_set.all()]
+        )
+        return redirect('quiz_app:live_quiz_new', quiz_id=quiz_id)
     else:
-        return redirect('quiz_app:quiz_result', quiz_id=quiz_id)
+        raise PermissionDenied()
 
-class LiveQuiz(TemplateView):
-    template_name = "quiz_app/quiz_questions.html"
-    def get_context_data(self, **kwargs):
+def liveQuiz(request, quiz_id):
+    context = {}
+    try:
+        quiz = Quiz.objects.get(id = uuid.UUID(quiz_id).hex)
+        quiz_record = QuizRecord.objects.get(user=request.user, quiz=quiz)
+    except (ValueError, Quiz.DoesNotExist, QuizRecord.DoesNotExist):
+        raise PermissionDenied()
 
-        try:
-            quiz_id = uuid.UUID(kwargs['quiz_id']).hex
-        except ValueError:
-            raise PermissionDenied()
-
-        try: 
-            quiz = Quiz.objects.get(id = quiz_id)
-        except Quiz.DoesNotExist:
-            raise PermissionDenied()
-
-        # Using Paginator
-
-        questions = quiz.question_set.all().order_by('question_number')
-        paginator = Paginator(questions, 1) # Show 1 question per page.
-
-        page_number = self.request.GET.get('page')
-        if not page_number:
-            page_number = 1
-        page_obj = paginator.get_page(page_number)
-        context = {
-            'page_obj' : page_obj,
-            'allPages' : paginator.page_range,
-        }
-
-        try:
-            record = QuizRecord.objects.get(user=self.request.user, quiz = page_obj.object_list[0].quiz)
-            answer = QuizAnswerRecord.objects.get(record = record, question = page_obj.object_list[0]).myAns
-            context['answer'] = answer
-        except (QuizRecord.DoesNotExist, QuizAnswerRecord.DoesNotExist):
-            #If this exception is called this means user has not answered this question till now.
-            #Do nothing
-            pass
-
-        all_status = [0]*questions.count()
-        for x in QuizAnswerRecord.objects.filter(record = record).order_by("question__question_number"):
-            all_status[x.question.question_number - 1] = x.status
-        context['all_status'] = all_status
+    if quiz_record.end_time < timezone.now():
+        #Quiz time expired.
+        raise PermissionDenied()
         
-        return context
+    questions = quiz.question_set.all()
+    
+    print(questions)
+
+    
+    return render(request, template_name="quiz_app/new_quiz_questions.html", context=context)
 
 class QuizResult(TemplateView):
     template_name = "quiz_app/quiz_result.html"
