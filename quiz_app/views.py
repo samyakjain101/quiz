@@ -163,6 +163,9 @@ class QuizResult(TemplateView):
                         if r.myAns.is_correct:
                             score += 1
 
+                allRecord = record.quizanswerrecord_set.all() # this is list of all ques
+                
+                context['allRecord'] = allRecord
                 context['quiz'] = quiz
                 context['score'] = score
                 context['total_attempted'] = total_attempted

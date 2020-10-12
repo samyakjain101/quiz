@@ -8,6 +8,20 @@
     Total Questions: {{ total_questions }} <br>
     Total Attempted: {{ total_attempted }} <br>
 
+    <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:8%;">
+        {% for record in allRecord %}
+            <p class="quiztext ajax-question-container" question_id="{{ record.question.id }}">
+                Q <span>{{ page_obj.number }}</span>. {{ record.question.question }}
+            </p>
+            {% for choice in record.question.choice_set.all %}
+                <p >
+                   &emsp;&emsp; <p style="float: left; {% if record.myAns == choice %} color:red; {% endif %} {% if choice.is_correct == True %} background-color:green; {% endif %}"  choice_id="{{ choice.id }}">{{ choice }}
+                </p>
+            {% endfor %}
+            <br><br><br>
+        {% endfor %}
+    </div>
+
 {% endblock %}
 
 {% block java_script %}
