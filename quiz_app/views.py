@@ -1,5 +1,7 @@
 import uuid
 import json
+import pytz
+from datetime import timedelta, datetime #for timer 
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
@@ -7,12 +9,9 @@ from django.core.paginator import Paginator
 from django.http import HttpResponse
 from django.urls import reverse
 from django.utils import timezone
+from django.conf import settings
 from .models import *
 
-#below for timer
-from datetime import timedelta, datetime #for timer 
-import pytz
-from django.conf import settings
 # Create your views here.
 
 class AvailableQuiz(TemplateView):
@@ -104,9 +103,7 @@ def startTimer(quizEndDate,recordStartDate,quizDuration):
     recordEndDate = recordStartDate + timerDuration
     
     if recordEndDate < datetime.now(tz=recordEndDate.tzinfo):
-        print(str(recordEndDate) + " < " + str(datetime.now(tz=recordEndDate.tzinfo)) + " => PermissionDenied")
         raise PermissionDenied()
-    print(str(recordStartDate) + " + " + str(timerDuration) + " = " + str(recordEndDate))
 
     return recordEndDate.year, recordEndDate.month, recordEndDate.day, recordEndDate.hour, recordEndDate.minute, recordEndDate.second
 
