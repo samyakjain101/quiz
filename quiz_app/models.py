@@ -44,9 +44,9 @@ class QuizRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     # start = models.DateTimeField() #when he started quiz
-    end_time = models.DateTimeField(editable = False)
+    end_time = models.DateTimeField(editable = True)
     completed = models.BooleanField(default=False)
-    
+
     class Meta:
         unique_together = [
             ("user", "quiz"),
@@ -57,7 +57,10 @@ class QuizRecord(models.Model):
     def save(self, *args, **kwargs):
         if not self.pk:
             # Object created
-            self.end_time = timezone.now() + self.quiz.duration
+            if self.quiz.end_date - timezone.now() >= self.quiz.duration:
+                self.end_time = timezone.now() + self.quiz.duration
+            else:
+                self.end_time = self.quiz.end_date - timezone.now()
         super().save(*args, **kwargs)
 
 class QuizAnswerRecord(models.Model):

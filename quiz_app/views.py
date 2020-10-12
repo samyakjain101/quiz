@@ -49,7 +49,7 @@ def liveQuiz(request, quiz_id):
     except (ValueError, Quiz.DoesNotExist, QuizRecord.DoesNotExist):
         raise PermissionDenied()
 
-    if quiz_record.end_time < timezone.now() or quiz_record.completed:
+    if quiz_record.end_time < timezone.now():
         #Quiz time expired.
         raise PermissionDenied()
         
@@ -149,6 +149,6 @@ def end_quiz(request, quiz_id):
     except (Quiz.DoesNotExist, QuizRecord.DoesNotExist):
         raise PermissionDenied()
 
-    record.completed = True
+    record.end_time = timezone.now()
     record.save()
     return redirect('quiz_app:available_quiz')
