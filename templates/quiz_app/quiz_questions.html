@@ -45,9 +45,9 @@
         </div>
         <div class="row" style="height:100%; border-bottom: 1px solid black;">
             <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:15px;">
-                <button class="btn btn-success quitbtn ajax-save-mark" url="{% url 'quiz_app:ajax_save_live_quiz' %}" to_do="saveAndNext" onclick="save(document.getElementById('qno').innerHTML)">Save &
+                <button class="btn btn-success quitbtn ajax-save-mark" url="{% url 'quiz_app:ajax_save_live_quiz' %}" to_do="saveAndNext">Save &
                     Next</button>
-                <button class="btn btn-info quitbtn ajax-save-mark" url="{% url 'quiz_app:ajax_save_live_quiz' %}" to_do="markForReview" onclick="mark(document.getElementById('qno').innerHTML)">Mark for
+                <button class="btn btn-info quitbtn ajax-save-mark" url="{% url 'quiz_app:ajax_save_live_quiz' %}" to_do="markForReview">Mark for
                     Review</button>
                 <button class="btn quitbtn skipbtn ajax-btn-page-direct"
                     {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %}>Skip</button>
