@@ -9,7 +9,7 @@
     <div id="ajax-main-container" style=" padding: 0px;">
         <div class="row quizheader">
             <div class="col-lg-9" style="border-right: 1px solid black;">
-                <p class="quizheadtext floatleft">{{ quiz_title }}</p>
+                <p class="quizheadtext floatleft">{{ quiz.title }}</p>
                 <p class="quizheadtext floatright">
                     Total Marks: {{ page_obj.paginator.num_pages }}
                 </p>
@@ -18,7 +18,7 @@
                 <p class="quiz-time floatleft">
                     <span class="bx bx-time">00:20:10</span>
                 </p>
-                <a class="btn btn-danger quitbtn" href="#">Quit</a>
+                <a class="btn btn-danger quitbtn" href="{% url 'quiz_app:end_quiz' quiz_id=quiz.id %}">Quit</a>
             </div>
         </div>
         <div class="row" style="height:100%;">

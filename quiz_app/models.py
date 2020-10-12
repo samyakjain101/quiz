@@ -45,6 +45,8 @@ class QuizRecord(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     # start = models.DateTimeField() #when he started quiz
     end_time = models.DateTimeField(editable = False)
+    completed = models.BooleanField(default=False)
+    
     class Meta:
         unique_together = [
             ("user", "quiz"),

@@ -49,7 +49,7 @@ def liveQuiz(request, quiz_id):
     except (ValueError, Quiz.DoesNotExist, QuizRecord.DoesNotExist):
         raise PermissionDenied()
 
-    if quiz_record.end_time < timezone.now():
+    if quiz_record.end_time < timezone.now() or quiz_record.completed:
         #Quiz time expired.
         raise PermissionDenied()
         
@@ -63,42 +63,12 @@ def liveQuiz(request, quiz_id):
         page_number = 1
     page_obj = paginator.get_page(page_number)
     context = {
-        'quiz_title' : quiz.title,
+        'quiz' : quiz,
         'page_obj' : page_obj,
         'records' : questions,
     }
 
     return render(request, template_name="quiz_app/quiz_questions.html", context=context)
-
-class QuizResult(TemplateView):
-    template_name = "quiz_app/quiz_result.html"
-    def get_context_data(self, **kwargs):
-        context = {}
-        try:
-            quiz_id = uuid.UUID(kwargs['quiz_id']).hex
-        except ValueError:
-            raise PermissionDenied()
-
-        try:
-            quiz = Quiz.objects.get(id=quiz_id)
-            record = QuizRecord.objects.get(user=self.request.user, quiz=quiz)
-            score = 0
-            total_attempted = 0
-            total_questions = record.quiz.question_set.all().count()
-            for r in record.quizanswerrecord_set.all():
-                total_attempted += 1 
-                if r.myAns and r.myAns.is_correct:
-                    score += 1
-
-            context['quiz'] = quiz
-            context['score'] = score
-            context['total_attempted'] = total_attempted
-            context['total_questions'] = total_questions
-
-        except (Quiz.DoesNotExist, QuizRecord.DoesNotExist):
-            raise PermissionDenied()
-
-        return context
 
 def save_answer(request):
     jsonr = {}
@@ -129,3 +99,56 @@ def save_answer(request):
             raise PermissionDenied()
         
     return HttpResponse(json.dumps(jsonr), content_type='application/json')
+
+class QuizResult(TemplateView):
+    template_name = "quiz_app/quiz_result.html"
+    def get_context_data(self, **kwargs):
+        context = {}
+        try:
+            quiz_id = uuid.UUID(kwargs['quiz_id']).hex
+        except ValueError:
+            raise PermissionDenied()
+
+        try:
+            quiz = Quiz.objects.get(id=quiz_id)
+            record = QuizRecord.objects.get(user=self.request.user, quiz=quiz)
+            if quiz.end_date < timezone.now():
+                #Quiz has ended and no one can give it now.
+                #Can show results now.
+                score = 0
+                total_attempted = 0
+                records = record.quizanswerrecord_set.all()
+                total_questions = records.count()
+                for r in record.quizanswerrecord_set.all():
+                    if r.myAns:
+                        total_attempted += 1 
+                        if r.myAns.is_correct:
+                            score += 1
+
+                context['quiz'] = quiz
+                context['score'] = score
+                context['total_attempted'] = total_attempted
+                context['total_questions'] = total_questions
+            else:
+                raise PermissionDenied
+
+        except (Quiz.DoesNotExist, QuizRecord.DoesNotExist):
+            raise PermissionDenied()
+
+        return context
+
+def end_quiz(request, quiz_id):
+    try:
+        quiz_id = uuid.UUID(quiz_id).hex
+    except ValueError:
+        raise PermissionDenied()
+
+    try:
+        quiz = Quiz.objects.get(id=quiz_id)
+        record = QuizRecord.objects.get(user=request.user, quiz=quiz)
+    except (Quiz.DoesNotExist, QuizRecord.DoesNotExist):
+        raise PermissionDenied()
+
+    record.completed = True
+    record.save()
+    return redirect('quiz_app:available_quiz')
