@@ -18,18 +18,14 @@ class Quiz(models.Model):
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    question_number = models.SmallIntegerField()
     question = models.TextField()
-
-    class Meta:
-        ordering = ("question_number",)
+    
     def __str__(self):
         return str(self.question)
 
 class Choice(models.Model):
     question = models.ForeignKey(Question, on_delete=models.CASCADE)
     choice = models.CharField(max_length=50)
-    position = models.SmallIntegerField()
     is_correct = models.BooleanField(default=False)
 
     class Meta:
@@ -37,7 +33,6 @@ class Choice(models.Model):
             # no duplicated choice per question
             ("question", "choice"),
         ]
-        ordering = ("position",)
 
     def __str__(self):
         return str(self.choice)
@@ -45,7 +40,7 @@ class Choice(models.Model):
 class QuizRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    start = models.DateTimeField(default=datetime.now()) #when he started quiz first time
+    start = models.DateTimeField(default=timezone.now) #when he started quiz first time
     end_time = models.DateTimeField(editable = False, blank=True, null=True)
     # completed = models.BooleanField(default=False)
 

@@ -43,7 +43,7 @@
             </div>
             <div class="col-lg-3">
                 <p class="quiz-time floatleft">
-                    <span class="bx bx-time">00:20:10</span>
+                    <span class="bx bx-time"></span>
                 </p>
                 <a class="btn btn-danger quitbtn" href="{% url 'quiz_app:end_quiz' quiz_id=quiz.id %}">Quit</a>
             </div>
@@ -80,7 +80,7 @@
                     {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %}>Skip</button>
             </div>
             <div class="col-lg-3" style="overflow-y: scroll;">
-                <a class="btn btn-success quitbtn" href="#">Submit</a>
+                <a class="btn btn-success quitbtn" href="{% url 'quiz_app:end_quiz' quiz_id=quiz.id %}">Submit</a>
             </div>
         </div>
     </div>

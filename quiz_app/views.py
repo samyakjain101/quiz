@@ -38,12 +38,15 @@ def attempt_quiz(request, **kwargs):
 
     #Check if user is attempting quiz first time.
     #If not Permission Denied.
-    obj, created = QuizRecord.objects.get_or_create(user=request.user, quiz=quiz)
-    if created:
-        QuizAnswerRecord.objects.bulk_create(
-            [QuizAnswerRecord(record = obj, question = x) for x in quiz.question_set.all()]
-        )
-        return redirect('quiz_app:live_quiz_new', quiz_id=quiz_id)
+    if quiz.start_date <= timezone.now() and quiz.end_date > timezone.now():
+        obj, created = QuizRecord.objects.get_or_create(user=request.user, quiz=quiz)
+        if created:
+            QuizAnswerRecord.objects.bulk_create(
+                [QuizAnswerRecord(record = obj, question = x) for x in quiz.question_set.all()]
+            )
+            return redirect('quiz_app:live_quiz_new', quiz_id=quiz_id)
+        else:
+            raise PermissionDenied()
     else:
         raise PermissionDenied()
 
@@ -54,11 +57,10 @@ def liveQuiz(request, quiz_id):
         quiz_record = QuizRecord.objects.get(user=request.user, quiz=quiz)
     except (ValueError, Quiz.DoesNotExist, QuizRecord.DoesNotExist):
         raise PermissionDenied()
+    
+    if not quiz.start_date <= timezone.now():
+        raise PermissionDenied()
 
-    # if quiz_record.end_time < timezone.now():
-    #     #Quiz time expired.
-    #     raise PermissionDenied()
-        
     questions = quiz_record.quizanswerrecord_set.all().order_by('id')
 
     # Using Paginator
