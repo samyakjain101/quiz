@@ -9,27 +9,27 @@
     <div id="ajax-main-container" style=" padding: 0px;">
         <div class="row quizheader">
             <div class="col-lg-9" style="border-right: 1px solid black;">
-                <p class="quizheadtext floatleft">{{ page_obj.0.quiz.title }}</p>
+                <p class="quizheadtext floatleft">{{ quiz_title }}</p>
                 <p class="quizheadtext floatright">
                     Total Marks: {{ page_obj.paginator.num_pages }}
                 </p>
             </div>
             <div class="col-lg-3">
                 <p class="quiz-time floatleft">
-                    <span class="bx bx-time"> 00:20:10</span>
+                    <span class="bx bx-time">00:20:10</span>
                 </p>
-                <a class="btn btn-danger quitbtn" href="{% url 'quiz_app:quiz_result' quiz_id=page_obj.0.quiz.id %}">Quit</a>
+                <a class="btn btn-danger quitbtn" href="#">Quit</a>
             </div>
         </div>
         <div class="row" style="height:100%;">
             <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:8%;">
                 {% for question in page_obj %}
                     <p class="quiztext ajax-question-container" question_id="{{ question.id }}">
-                        Q <span>{{ question.question_number }}</span>. {{ question.question }}
+                        Q <span>{{ page_obj.number }}</span>. {{ question.question }}
                     </p>
-                    {% for choice in question.choice_set.all %}
+                    {% for choice in question.question.choice_set.all %}
                         <p class="quiztext">
-                            <input {% if answer.id == choice.id %}checked{% endif %} type="radio" name="optradio" choice_id="{{ choice.id }}">{{ choice }}
+                            <input {% if question.myAns == choice %}checked{% endif %} type="radio" name="optradio" choice_id="{{ choice.id }}">{{ choice }}
                         </p>
                     {% endfor %}
                 {% endfor %}
@@ -37,16 +37,8 @@
             <div class="col-lg-3" style="overflow-y: scroll;">
                 <p id="totalq" style="display:none;">15</p>
                 <div class="row" style="padding:5px;">
-                    <!-- {% with ''|center:15 as range %}
-                    {% for i in range %}
-                    {% for column in i %}
-                    <div class="questiontag" onclick="showq({{forloop.parentloop.counter}})"
-                        id="q{{forloop.parentloop.counter}}">{{forloop.parentloop.counter}}</div>
-                    {% endfor %}
-                    {% endfor %}
-                    {% endwith %} -->
-                    {% for status in all_status %}
-                        <button class="btn ajax-btn-page-direct {% if status == 0 %}btn-warning{% elif status == 1 %}btn-info{% else %}btn-success{% endif %}" url="?page={{ forloop.counter }}">{{ forloop.counter }}</button>        
+                    {% for record in records %}
+                        <button class="btn ajax-btn-page-direct {% if record.status == 0 %}btn-warning{% elif record.status == 1 %}btn-info{% else %}btn-success{% endif %}" url="?page={{ forloop.counter }}">{{ forloop.counter }}</button>        
                     {% endfor %}
                 </div>
             </div>
@@ -61,62 +53,14 @@
                     {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %}>Skip</button>
             </div>
             <div class="col-lg-3" style="overflow-y: scroll;">
-                <a class="btn btn-success quitbtn" href="{% url 'quiz_app:quiz_result' quiz_id=page_obj.0.quiz.id %}">Submit</a>
+                <a class="btn btn-success quitbtn" href="#">Submit</a>
             </div>
         </div>
     </div>
 </section>
 
-<!-- <script src="{% static 'vendor/ajax/jquery.min.js' %}"></script> -->
-
 {% endblock body_block %}
 
 {% block java_script %}
-<!-- <script type="text/javascript">
-    var total = document.getElementById("totalq").innerHTML;
-    $(document).ready(function () {
-        n = document.getElementById("qno").innerHTML;
-        $('#q1').css({ "opacity": "0.5" });
-    })
-    function save(v) {
-        $('#q' + v).css({ "color": "white", "background-color": "#198531" });
-        n = parseInt(v) + 1
-        if (n > total) {
-            n = 1;
-        }
-        n = n.toString()
-        document.getElementById("qno").innerHTML = n;
-        $('.questiontag').css({ "opacity": "1" });
-        $('#q' + n).css({ "opacity": "0.5" });
-    }
-    function mark(v) {
-        $('#q' + v).css({ "color": "white", "background-color": "#06809B" });
-        n = parseInt(v) + 1
-        if (n > total) {
-            n = 1;
-        }
-        n = n.toString()
-        document.getElementById("qno").innerHTML = n;
-        $('.questiontag').css({ "opacity": "1" });
-        $('#q' + n).css({ "opacity": "0.5" });
-    }
-    function skp(v) {
-        $('#q' + v).css({ "color": "white", "background-color": "#76767B" });
-        n = parseInt(v) + 1
-        if (n > total) {
-            n = 1;
-        }
-        n = n.toString()
-        document.getElementById("qno").innerHTML = n;
-        $('.questiontag').css({ "opacity": "1" });
-        $('#q' + n).css({ "opacity": "0.5" });
-    }
-    function showq(n) {
-        document.getElementById("qno").innerHTML = n;
-        $('.questiontag').css({ "opacity": "1" });
-        $('#q' + n).css({ "opacity": "0.5" });
-    }
-
-</script> -->
 <script src="{% static 'js/live_quiz.js' %}"></script>
 {% endblock %}

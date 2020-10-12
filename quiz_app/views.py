@@ -97,12 +97,22 @@ def liveQuiz(request, quiz_id):
         #Quiz time expired.
         raise PermissionDenied()
         
-    questions = quiz.question_set.all()
-    
-    print(questions)
+    questions = quiz_record.quizanswerrecord_set.all().order_by('id')
 
-    
-    return render(request, template_name="quiz_app/new_quiz_questions.html", context=context)
+    # Using Paginator
+    paginator = Paginator(questions, 1) # Show 1 question per page.
+
+    page_number = request.GET.get('page')
+    if not page_number:
+        page_number = 1
+    page_obj = paginator.get_page(page_number)
+    context = {
+        'quiz_title' : quiz.title,
+        'page_obj' : page_obj,
+        'records' : questions,
+    }
+
+    return render(request, template_name="quiz_app/quiz_questions.html", context=context)
 
 class QuizResult(TemplateView):
     template_name = "quiz_app/quiz_result.html"
