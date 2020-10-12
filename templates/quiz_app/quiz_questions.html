@@ -2,10 +2,37 @@
 {% load static %}
 {% block css_block %}
 <link rel="stylesheet" href="{% static 'css/quiz_live.css' %}">
+{% comment %} below is for timer {% endcomment %}
+<link rel="stylesheet" type="text/css" href="{% static 'css/countdown/jquery.countdown.css' %}"> 
 {% endblock %}
 {% block body_block %}
 
+<div class="container">
+    <p class="quiz-time floatleft">
+        <div id="timerDetails" 
+        years="{{ years }}" 
+        months="{{ months }}" 
+        days="{{ days }}" 
+        hours="{{ hours }}" 
+        minutes="{{ minutes }}" 
+        seconds="{{ seconds }}" 
+        
+        expiryUrl="{{ expiryUrl }}" 
+        ></div>
+        {% comment %} above space is left for alwaysExpire {% endcomment %}
+        
+        <div class="container">
+            <div id="defaultCountdown"></div>
+        </div>
+        
+    {% comment %} class="bx bx-time" {% endcomment %}
+    </p>
+
+</div>
+
+
 <section style="padding-bottom:0px; padding-top:48px;">
+    
     <div id="ajax-main-container" style=" padding: 0px;">
         <div class="row quizheader">
             <div class="col-lg-9" style="border-right: 1px solid black;">
@@ -63,4 +90,7 @@
 
 {% block java_script %}
 <script src="{% static 'js/live_quiz.js' %}"></script>
+{% comment %} below are for timer {% endcomment %}
+<script type="text/javascript" src="{% static 'js/countdown/jquery.plugin.js' %}"></script> 
+<script type="text/javascript" src="{% static 'js/countdown/jquery.countdown.js' %}"></script>
 {% endblock %}

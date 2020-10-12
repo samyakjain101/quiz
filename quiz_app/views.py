@@ -5,8 +5,14 @@ from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
 from django.core.paginator import Paginator
 from django.http import HttpResponse
+from django.urls import reverse
 from django.utils import timezone
 from .models import *
+
+#below for timer
+from datetime import timedelta, datetime #for timer 
+import pytz
+from django.conf import settings
 # Create your views here.
 
 class AvailableQuiz(TemplateView):
@@ -49,9 +55,9 @@ def liveQuiz(request, quiz_id):
     except (ValueError, Quiz.DoesNotExist, QuizRecord.DoesNotExist):
         raise PermissionDenied()
 
-    if quiz_record.end_time < timezone.now():
-        #Quiz time expired.
-        raise PermissionDenied()
+    # if quiz_record.end_time < timezone.now():
+    #     #Quiz time expired.
+    #     raise PermissionDenied()
         
     questions = quiz_record.quizanswerrecord_set.all().order_by('id')
 
@@ -68,7 +74,40 @@ def liveQuiz(request, quiz_id):
         'records' : questions,
     }
 
+    #timer contexts adding
+    recordStartDate = quiz_record.start
+    gmt5 = pytz.timezone(settings.TIME_ZONE)
+    recordStartDate = recordStartDate.astimezone(gmt5)
+    quizDuration = quiz.duration
+    
+    context['years'],context['months'],context['days'],context['hours'],context['minutes'],context['seconds'] = startTimer(quiz.end_date,recordStartDate,quizDuration)
+    
+    context['expiryUrl'] = reverse('quiz_app:available_quiz')
+            
+
     return render(request, template_name="quiz_app/quiz_questions.html", context=context)
+
+def startTimer(quizEndDate,recordStartDate,quizDuration):
+    #below for timer
+    #For setting time for js timer:
+    # (end date - start date) = Total duration or Td
+    Td = quizEndDate - recordStartDate
+    if Td > quizDuration:  # case 1: Td > d -> timerDuration = d
+        timerDuration = quizDuration
+    elif Td < quizDuration: # case 2: Td < d -> timerDuration = Td
+        timerDuration = Td 
+    elif Td == quizDuration: # case 3: Td == d -> timerDuration = d
+        timerDuration = quizDuration
+    
+    recordEndDate = recordStartDate + timerDuration
+    
+    if recordEndDate < datetime.now(tz=recordEndDate.tzinfo):
+        print(str(recordEndDate) + " < " + str(datetime.now(tz=recordEndDate.tzinfo)) + " => PermissionDenied")
+        raise PermissionDenied()
+    print(str(recordStartDate) + " + " + str(timerDuration) + " = " + str(recordEndDate))
+
+    return recordEndDate.year, recordEndDate.month, recordEndDate.day, recordEndDate.hour, recordEndDate.minute, recordEndDate.second
+
 
 def save_answer(request):
     jsonr = {}

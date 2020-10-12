@@ -1,5 +1,20 @@
 $(document).ready(function () {
-    console.log("Loaded")
+    console.log("Loaded");
+
+    // below are for timer
+    var years = document.getElementById("timerDetails").getAttribute("years");
+    var months = document.getElementById("timerDetails").getAttribute("months");
+    var days = document.getElementById("timerDetails").getAttribute("days");
+    var hours = document.getElementById("timerDetails").getAttribute("hours");
+    var minutes = document.getElementById("timerDetails").getAttribute("minutes");
+    var seconds = document.getElementById("timerDetails").getAttribute("seconds");
+    var expiryUrl = document.getElementById("timerDetails").getAttribute("expiryUrl");
+    var timerDuration = new Date(years, months-1, days, hours,minutes,seconds,0);
+    $('#defaultCountdown').countdown({until: timerDuration, compact: true, format: 'HMS',expiryText: 'TEST EXPIRED',expiryUrl: expiryUrl,}); 
+    console.log(hours + " : " + minutes + " : " + seconds);
+    console.log(timerDuration);
+    // above are for timer
+
     $('body').on('click', '.ajax-save-mark' ,function (event) {
         var btn = $(this)
         event.preventDefault()

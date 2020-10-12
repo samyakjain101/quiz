@@ -2,6 +2,8 @@ import uuid
 from django.db import models
 from django.contrib.auth.models import User
 from django.utils import timezone
+from datetime import timedelta,datetime
+delta = timedelta(minutes=30,)
 
 # Create your models here.
 class Quiz(models.Model):
@@ -9,7 +11,7 @@ class Quiz(models.Model):
     start_date = models.DateTimeField()
     end_date = models.DateTimeField()
     title = models.CharField(max_length=50)
-    duration = models.DurationField()
+    duration = models.DurationField(default = delta)
 
     def __str__(self):
         return str(self.id)
@@ -43,9 +45,9 @@ class Choice(models.Model):
 class QuizRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
-    # start = models.DateTimeField() #when he started quiz
-    end_time = models.DateTimeField(editable = True)
-    completed = models.BooleanField(default=False)
+    start = models.DateTimeField(default=datetime.now()) #when he started quiz first time
+    end_time = models.DateTimeField(editable = False, blank=True, null=True)
+    # completed = models.BooleanField(default=False)
 
     class Meta:
         unique_together = [
@@ -54,14 +56,14 @@ class QuizRecord(models.Model):
     def __str__(self):
         return str(self.user)
     
-    def save(self, *args, **kwargs):
-        if not self.pk:
-            # Object created
-            if self.quiz.end_date - timezone.now() >= self.quiz.duration:
-                self.end_time = timezone.now() + self.quiz.duration
-            else:
-                self.end_time = self.quiz.end_date - timezone.now()
-        super().save(*args, **kwargs)
+    # def save(self, *args, **kwargs):
+    #     if not self.pk:
+    #         # Object created
+    #         if self.quiz.end_date - timezone.now() >= self.quiz.duration:
+    #             self.end_time = timezone.now() + self.quiz.duration
+    #         else:
+    #             self.end_time = self.quiz.end_date - timezone.now()
+    #     super().save(*args, **kwargs)
 
 class QuizAnswerRecord(models.Model):
     record =  models.ForeignKey(QuizRecord,on_delete=models.CASCADE)
