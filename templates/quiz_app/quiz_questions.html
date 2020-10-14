@@ -65,18 +65,20 @@
                 <p id="totalq" style="display:none;">15</p>
                 <div class="row" style="padding:5px;">
                     {% for record in records %}
-                        <button class="btn ajax-btn-page-direct {% if record.status == 0 %}btn-warning{% elif record.status == 1 %}btn-info{% else %}btn-success{% endif %}" url="?page={{ forloop.counter }}">{{ forloop.counter }}</button>        
+                        <button class="btn ajax-save-or-skip {% if record.status == 0 %}btn-warning{% elif record.status == 1 %}btn-info{% else %}btn-success{% endif %}" url="?page={{ forloop.counter }}">{{ forloop.counter }}</button>        
                     {% endfor %}
                 </div>
             </div>
         </div>
         <div class="row" style="height:100%; border-bottom: 1px solid black;">
             <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:15px;">
-                <button class="btn btn-success quitbtn ajax-save-mark" url="{% url 'quiz_app:ajax_save_live_quiz' %}" to_do="saveAndNext">Save &
+                <button class="btn btn-success quitbtn ajax-save-or-skip" 
+                {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %} to_do="saveAndNext">Save &
                     Next</button>
-                <button class="btn btn-info quitbtn ajax-save-mark" url="{% url 'quiz_app:ajax_save_live_quiz' %}" to_do="markForReview">Mark for
+                <button class="btn btn-info quitbtn ajax-save-or-skip" 
+                {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %} to_do="markForReview">Mark for
                     Review</button>
-                <button class="btn quitbtn skipbtn ajax-btn-page-direct"
+                <button class="btn quitbtn skipbtn ajax-save-or-skip"
                     {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %}>Skip</button>
             </div>
             <div class="col-lg-3" style="overflow-y: scroll;">

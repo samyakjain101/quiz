@@ -80,11 +80,33 @@ def liveQuiz(request, quiz_id):
     gmt5 = pytz.timezone(settings.TIME_ZONE)
     recordStartDate = recordStartDate.astimezone(gmt5)
     quizDuration = quiz.duration
-    
     context['years'],context['months'],context['days'],context['hours'],context['minutes'],context['seconds'] = startTimer(quiz.end_date,recordStartDate,quizDuration)
-    
     context['expiryUrl'] = reverse('quiz_app:available_quiz')
-            
+
+    #Save Answer if there.
+    to_do = request.GET.get('to_do')
+    if to_do:
+        question_id = request.GET.get('question_id')
+        choice_id = request.GET.get('choice_id')
+        try:
+            question = QuizAnswerRecord.objects.get(id=question_id)
+            if choice_id:   
+                choice = Choice.objects.get(id=choice_id)
+            else:
+                choice = None
+
+            if to_do == "saveAndNext" and choice:
+                question.status = QuizAnswerRecord.SAVE_AND_NEXT
+            elif to_do == "markForReview":
+                question.status = QuizAnswerRecord.MARK_FOR_REVIEW
+
+            question.myAns = choice
+            question.save()
+
+        except (Choice.DoesNotExist, QuizAnswerRecord.DoesNotExist):
+            raise PermissionDenied()
+    else:
+        pass
 
     return render(request, template_name="quiz_app/quiz_questions.html", context=context)
 
@@ -106,37 +128,6 @@ def startTimer(quizEndDate,recordStartDate,quizDuration):
         raise PermissionDenied()
 
     return recordEndDate.year, recordEndDate.month, recordEndDate.day, recordEndDate.hour, recordEndDate.minute, recordEndDate.second
-
-
-def save_answer(request):
-    jsonr = {}
-    if request.is_ajax():
-        current_user = request.user
-        to_do = request.GET.get('to_do')
-        question_id = request.GET.get('question_id')
-        choice_id = request.GET.get('choice_id')
-        
-        try:
-            question = QuizAnswerRecord.objects.get(id=question_id)
-            if choice_id:   
-                choice = Choice.objects.get(id=choice_id)
-            else:
-                choice = None
-
-            if to_do == "saveAndNext":
-                jsonr['message'] = "Choice Updated"
-                question.status = QuizAnswerRecord.SAVE_AND_NEXT
-            elif to_do == "markForReview":
-                question.status = QuizAnswerRecord.MARK_FOR_REVIEW
-                jsonr['message'] = "Marked For Review"
-
-            question.myAns = choice
-            question.save()
-
-        except (Choice.DoesNotExist, QuizAnswerRecord.DoesNotExist):
-            raise PermissionDenied()
-        
-    return HttpResponse(json.dumps(jsonr), content_type='application/json')
 
 class QuizResult(TemplateView):
     template_name = "quiz_app/quiz_result.html"
