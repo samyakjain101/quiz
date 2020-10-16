@@ -3,24 +3,44 @@
 {% block css_block %} {% endblock %}
 
 {% block body_block %}
-    Quiz: {{ quiz.title }} <br>
-    Score: {{ score }} <br>
-    Total Questions: {{ total_questions }} <br>
-    Total Attempted: {{ total_attempted }} <br>
-
-    <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:8%;">
-        {% for record in allRecord %}
-            <p class="quiztext ajax-question-container" question_id="{{ record.question.id }}">
-                Q <span>{{ page_obj.number }}</span>. {{ record.question.question }}
-            </p>
-            {% for choice in record.question.choice_set.all %}
-                <p >
-                   &emsp;&emsp; <p style="float: left; {% if record.myAns == choice %} color:red; {% endif %} {% if choice.is_correct == True %} background-color:green; {% endif %}"  choice_id="{{ choice.id }}">{{ choice }}
-                </p>
-            {% endfor %}
-            <br><br><br>
-        {% endfor %}
+<div class="container bg-white w-75 my-4 p-4">
+    <h1 class="display-5">Result of {{ quiz.title }}-</h1>
+    <div class="row my-4 d-flex text-danger">
+        <div class="col-xl-6 text-right">Score:</div>
+        <div class="col-xl-6">{{ score }}</div>
+        <div class="col-xl-6 text-right">Total Questions:</div>
+        <div class="col-xl-6">{{ total_questions }}</div>
+        <div class="col-xl-6 text-right">Total Attempted:</div>
+        <div class="col-xl-6">{{ total_attempted }}</div>
     </div>
+    <h1 class="display-6">Responses:</h1>
+    {% for record in allRecord %}
+        <div class="mt-4 py-1">
+            <p class="quiztext ajax-question-container" question_id="{{ record.question.id }}">
+                Q <span>{{ forloop.counter }}</span>. {{ record.question.question }}
+                {% if record.myAns.is_correct %}
+                <span class="ml-4 text-success font-weight-bold">Correct</span>
+                {% elif record.myAns %}
+                <span class="ml-4 text-danger font-weight-bold">Incorrect</span>
+                {% endif %}
+            </p>
+            
+            {% for choice in record.question.choice_set.all %}
+            <p class="quiztext">
+                <input class="mr-2" {% if record.myAns == choice %}checked{% endif %} type="radio">{{ choice }}
+                <!-- {% if record.myAns == choice %} 
+                                {% if choice.is_correct %}
+                                    <span class="ml-4 text-success">Correct</span>
+                                {% else %}
+                                    <span class="ml-4 text-success">Incorrect</span>
+                                {% endif %}
+                            {% endif %} -->
+                <!-- &emsp;&emsp; <p style="float: left; {% if record.myAns == choice %} color:red; {% endif %} {% if choice.is_correct == True %} background-color:green; {% endif %}"  choice_id="{{ choice.id }}">{{ choice }} -->
+            </p>
+            {% endfor %}
+        </div>
+    {% endfor %}
+</div>
 
 {% endblock %}
 

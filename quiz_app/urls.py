@@ -10,4 +10,5 @@ urlpatterns = [
     # path('ajax/live/quiz',save_answer, name="ajax_save_live_quiz"),
     path('live/quiz/<quiz_id>',liveQuiz, name="live_quiz_new"),
     path('live/quiz/end/<quiz_id>',end_quiz, name="end_quiz"),
+    path('quiz/results',Results.as_view(), name="results"),
 ]

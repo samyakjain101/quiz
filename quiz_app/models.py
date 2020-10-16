@@ -41,24 +41,13 @@ class QuizRecord(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)
     start = models.DateTimeField(default=timezone.now) #when he started quiz first time
-    end_time = models.DateTimeField(editable = False, blank=True, null=True)
-    # completed = models.BooleanField(default=False)
-
+    is_submitted = models.BooleanField(default=False)
     class Meta:
         unique_together = [
             ("user", "quiz"),
         ]
     def __str__(self):
         return str(self.user)
-    
-    # def save(self, *args, **kwargs):
-    #     if not self.pk:
-    #         # Object created
-    #         if self.quiz.end_date - timezone.now() >= self.quiz.duration:
-    #             self.end_time = timezone.now() + self.quiz.duration
-    #         else:
-    #             self.end_time = self.quiz.end_date - timezone.now()
-    #     super().save(*args, **kwargs)
 
 class QuizAnswerRecord(models.Model):
     record =  models.ForeignKey(QuizRecord,on_delete=models.CASCADE)

@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+{% load static %}
+{% block css_block %} {% endblock %}
+
+{% block body_block %}
+<div class="container bg-white mt-3 p-3">
+    <h1 class="display-4 mb-4">Results</h1>
+    {% if results %}
+        {% for result in results %}
+        <div class=" mb-4 border p-3">
+            <p class="display-6">{{ result.quiz.title }}</p>
+            <div class="row mb-3">
+                <div class="col-xl-3">Start time:</div>
+                <div class="col-xl-9">{{result.quiz.start_date}}</div>
+                <div class="col-xl-3">End time:</div>
+                <div class="col-xl-9">{{result.quiz.end_date}}</div>
+                <div class="col-xl-3">Duration:</div>
+                <div class="col-xl-9">{{result.quiz.duration}}</div>
+            </div>
+            {% now "jS F Y H:i" as current_time %}
+            <a class="btn btn-danger rounded-0" href="{% url 'quiz_app:quiz_result' quiz_id=result.quiz.id %}">View Results</a>
+        </div>
+        {% endfor %}
+    {% else %}
+        <p>No results to show.</p>
+    {% endif %}
+</div>
+
+{% endblock body_block %}
+
+{% block java_script %}
+{% endblock %}

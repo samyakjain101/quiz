@@ -3,14 +3,33 @@
 {% block css_block %} {% endblock %}
 
 {% block body_block %}
-
-{% if quizzes %}
-    {% for quiz in quizzes %}
-        {{ quiz.title }} <a href="{% url 'quiz_app:attempt_quiz' quiz_id=quiz.id %}">Attempt</a>
-    {% endfor %}
-{% else %}  
+<div class="container bg-white mt-3 p-3">
+    <h1 class="display-4 mb-4">Available Quizzes</h1>
+    <a class="btn border rounded-0 mb-4" href="{% url 'quiz_app:results' %}">View Results</a>
+    {% if quizzes %}
+        {% for quiz in quizzes %}
+            <div class=" mb-4 border p-3">
+                <p class="display-6">{{ quiz.title }}</p>
+                <div class="row mb-3">
+                    <div class="col-xl-3">Start time:</div>
+                    <div class="col-xl-9">{{quiz.start_date}}</div>
+                    <div class="col-xl-3">End time:</div>
+                    <div class="col-xl-9">{{quiz.end_date}}</div>
+                    <div class="col-xl-3">Duration:</div>
+                    <div class="col-xl-9">{{quiz.duration}}</div>
+                </div>
+                {% now "jS F Y H:i" as current_time %}
+                {% if current_time > quiz.end_date|date:"jS F Y H:i" %}
+                    <p class="text-danger">Quiz Ended</p>
+                {% else %}
+                    <a class="btn btn-danger rounded-0" href="{% url 'quiz_app:attempt_quiz' quiz_id=quiz.id %}">Attempt</a>
+                {% endif %}
+            </div>
+        {% endfor %}
+    {% else %}
     <p>No quiz available right now. Come back later.</p>
-{% endif %}
+    {% endif %}
+</div>
 
 {% endblock body_block %}
 

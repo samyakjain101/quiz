@@ -17,7 +17,8 @@ from .models import *
 class AvailableQuiz(TemplateView):
     template_name = "quiz_app/available_quiz.html"
     def get_context_data(self, **kwargs):
-        quizzes = Quiz.objects.filter(start_date__lt=timezone.now(),end_date__gt=timezone.now())
+        # quizzes = Quiz.objects.filter(start_date__lt=timezone.now(),end_date__gt=timezone.now())
+        quizzes = Quiz.objects.filter(start_date__lt=timezone.now())
         context = {
             'quizzes' : quizzes
         }
@@ -43,9 +44,10 @@ def attempt_quiz(request, **kwargs):
             QuizAnswerRecord.objects.bulk_create(
                 [QuizAnswerRecord(record = obj, question = x) for x in quiz.question_set.all()]
             )
-            return redirect('quiz_app:live_quiz_new', quiz_id=quiz_id)
         else:
-            raise PermissionDenied()
+            if obj.start + quiz.duration < timezone.now() or obj.is_submitted:
+                raise PermissionDenied()
+        return redirect('quiz_app:live_quiz_new', quiz_id=quiz_id)
     else:
         raise PermissionDenied()
 
@@ -57,14 +59,13 @@ def liveQuiz(request, quiz_id):
     except (ValueError, Quiz.DoesNotExist, QuizRecord.DoesNotExist):
         raise PermissionDenied()
     
-    if not quiz.start_date <= timezone.now():
+    if quiz.start_date > timezone.now() or quiz_record.is_submitted:
         raise PermissionDenied()
 
     questions = quiz_record.quizanswerrecord_set.all().order_by('id')
 
     # Using Paginator
     paginator = Paginator(questions, 1) # Show 1 question per page.
-
     page_number = request.GET.get('page')
     if not page_number:
         page_number = 1
@@ -129,6 +130,15 @@ def startTimer(quizEndDate,recordStartDate,quizDuration):
 
     return recordEndDate.year, recordEndDate.month, recordEndDate.day, recordEndDate.hour, recordEndDate.minute, recordEndDate.second
 
+class Results(TemplateView):
+    template_name = "quiz_app/results.html"
+    def get_context_data(self, **kwargs):
+        results = QuizRecord.objects.filter(user=self.request.user, quiz__end_date__lt=timezone.now())
+        context = {
+            'results' : results
+        }
+        return context
+
 class QuizResult(TemplateView):
     template_name = "quiz_app/quiz_result.html"
     def get_context_data(self, **kwargs):
@@ -155,7 +165,6 @@ class QuizResult(TemplateView):
                             score += 1
 
                 allRecord = record.quizanswerrecord_set.all() # this is list of all ques
-                
                 context['allRecord'] = allRecord
                 context['quiz'] = quiz
                 context['score'] = score
@@ -181,6 +190,6 @@ def end_quiz(request, quiz_id):
     except (Quiz.DoesNotExist, QuizRecord.DoesNotExist):
         raise PermissionDenied()
 
-    record.end_time = timezone.now()
+    record.is_submitted = True
     record.save()
     return redirect('quiz_app:available_quiz')

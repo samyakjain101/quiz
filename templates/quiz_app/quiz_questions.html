@@ -22,7 +22,7 @@
         {% comment %} above space is left for alwaysExpire {% endcomment %}
         
         <div class="container">
-            <div id="defaultCountdown"></div>
+            <div class="text-center border-0" id="defaultCountdown"></div>
         </div>
         
     {% comment %} class="bx bx-time" {% endcomment %}
@@ -30,63 +30,52 @@
 
 </div>
 
-
-<section style="padding-bottom:0px; padding-top:48px;">
-    
-    <div id="ajax-main-container" style=" padding: 0px;">
-        <div class="row quizheader">
-            <div class="col-lg-9" style="border-right: 1px solid black;">
-                <p class="quizheadtext floatleft">{{ quiz.title }}</p>
-                <p class="quizheadtext floatright">
-                    Total Marks: {{ page_obj.paginator.num_pages }}
-                </p>
-            </div>
-            <div class="col-lg-3">
-                <p class="quiz-time floatleft">
-                    <span class="bx bx-time"></span>
-                </p>
-                <a class="btn btn-danger quitbtn" href="{% url 'quiz_app:end_quiz' quiz_id=quiz.id %}">Quit</a>
-            </div>
-        </div>
-        <div class="row" style="height:100%;">
-            <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:8%;">
+<div class="container-fluid" onmousedown='return false;' onselectstart='return false;'>
+    <div class="row" id="ajax-main-container">
+        <div class="col-xl-9 col-lg-8 col-md-12 mb-3">
+            <div class="ml-lg-2 shadow p-4 bg-white" style="overflow: auto;">
+                <div class="w-100 mb-4">
+                    <span class="display-5">{{ quiz.title }}</span>
+                    <span class="float-right">Total Marks: {{ page_obj.paginator.num_pages }}</span>
+                </div>
                 {% for question in page_obj %}
                     <p class="quiztext ajax-question-container" question_id="{{ question.id }}">
                         Q <span>{{ page_obj.number }}</span>. {{ question.question }}
                     </p>
                     {% for choice in question.question.choice_set.all %}
-                        <p class="quiztext">
-                            <input {% if question.myAns == choice %}checked{% endif %} type="radio" name="optradio" choice_id="{{ choice.id }}">{{ choice }}
-                        </p>
+                    <p class="quiztext">
+                        <input class="mr-2" {% if question.myAns == choice %}checked{% endif %} type="radio" name="optradio"
+                            choice_id="{{ choice.id }}">{{ choice }}
+                    </p>
                     {% endfor %}
                 {% endfor %}
-            </div>
-            <div class="col-lg-3" style="overflow-y: scroll;">
-                <p id="totalq" style="display:none;">15</p>
-                <div class="row" style="padding:5px;">
-                    {% for record in records %}
-                        <button class="btn ajax-save-or-skip {% if record.status == 0 %}btn-warning{% elif record.status == 1 %}btn-info{% else %}btn-success{% endif %}" url="?page={{ forloop.counter }}">{{ forloop.counter }}</button>        
-                    {% endfor %}
-                </div>
-            </div>
-        </div>
-        <div class="row" style="height:100%; border-bottom: 1px solid black;">
-            <div class="col-lg-9" style="border-right: 1px solid black; padding-bottom:15px;">
-                <button class="btn btn-success quitbtn ajax-save-or-skip" 
+                <button class="btn btn-success ajax-save-or-skip float-right ml-2" 
                 {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %} to_do="saveAndNext">Save &
                     Next</button>
-                <button class="btn btn-info quitbtn ajax-save-or-skip" 
+                <button class="btn btn-info ajax-save-or-skip float-right ml-2" 
                 {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %} to_do="markForReview">Mark for
                     Review</button>
-                <button class="btn quitbtn skipbtn ajax-save-or-skip"
+                <button class="btn btn-secondary ajax-save-or-skip float-right ml-2"
                     {% if page_obj.has_next %} url="?page={{ page_obj.next_page_number }}"{% else %}url="?page=1"{% endif %}>Skip</button>
-            </div>
-            <div class="col-lg-3" style="overflow-y: scroll;">
-                <a class="btn btn-success quitbtn" href="{% url 'quiz_app:end_quiz' quiz_id=quiz.id %}">Submit</a>
+                </div>
+        </div>
+        <div class="col-xl-3 col-lg-4 col-md-12">
+            <div class="mx-lg-2 shadow p-4 bg-white" style="overflow: auto;">
+                <!-- <a class="btn btn-danger" href="{% url 'quiz_app:end_quiz' quiz_id=quiz.id %}">Quit</a> -->
+                <p id="totalq" style="display:none;">15</p>
+                <div class="row p-4" style="padding:5px;">
+                    {% for record in records %}
+                    <button class="btn mr-2 mb-2 ajax-save-or-skip {% if record.status == 0 %}btn-warning{% elif record.status == 1 %}btn-info{% else %}btn-success{% endif %}"
+                        url="?page={{ forloop.counter }}">{{ forloop.counter }}
+                    </button>
+                    {% endfor %}
+                </div>
+                <a class="btn btn-success float-right" href="{% url 'quiz_app:end_quiz' quiz_id=quiz.id %}">Submit</a>
             </div>
         </div>
     </div>
-</section>
+</div>
+
 
 {% endblock body_block %}
 

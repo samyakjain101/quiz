@@ -1,4 +1,4 @@
-/*! http://keith-wood.name/countdown.html
+/*! http://keith-wood.name/countdown.html 
 	Countdown for jQuery v2.1.0.
 	Written by Keith Wood (wood.keith{at}optusnet.com.au) January 2008.
 	Available under the MIT (http://keith-wood.name/licence.html) license. 
