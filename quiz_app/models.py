@@ -14,7 +14,7 @@ class Quiz(models.Model):
     duration = models.DurationField(default = delta)
 
     def __str__(self):
-        return str(self.id)
+        return self.title
 
 class Question(models.Model):
     quiz = models.ForeignKey(Quiz, on_delete=models.CASCADE)

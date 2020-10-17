@@ -2,6 +2,8 @@ import uuid
 import json
 import pytz
 from datetime import timedelta, datetime #for timer 
+from django.contrib.auth.decorators import login_required
+from django.contrib.auth.mixins import LoginRequiredMixin
 from django.shortcuts import render, redirect
 from django.views.generic import TemplateView
 from django.core.exceptions import PermissionDenied
@@ -14,16 +16,17 @@ from .models import *
 
 # Create your views here.
 
-class AvailableQuiz(TemplateView):
+class AvailableQuiz(LoginRequiredMixin ,TemplateView):
     template_name = "quiz_app/available_quiz.html"
     def get_context_data(self, **kwargs):
         # quizzes = Quiz.objects.filter(start_date__lt=timezone.now(),end_date__gt=timezone.now())
-        quizzes = Quiz.objects.filter(start_date__lt=timezone.now())
+        quizzes = Quiz.objects.filter(start_date__lt=timezone.now()).order_by('-start_date')
         context = {
             'quizzes' : quizzes
         }
         return context
 
+@login_required
 def attempt_quiz(request, **kwargs):
     # Check if quiz_id is valid uuid 
     try:
@@ -51,6 +54,7 @@ def attempt_quiz(request, **kwargs):
     else:
         raise PermissionDenied()
 
+@login_required
 def liveQuiz(request, quiz_id):
     context = {}
     try:
@@ -130,7 +134,7 @@ def startTimer(quizEndDate,recordStartDate,quizDuration):
 
     return recordEndDate.year, recordEndDate.month, recordEndDate.day, recordEndDate.hour, recordEndDate.minute, recordEndDate.second
 
-class Results(TemplateView):
+class Results(LoginRequiredMixin ,TemplateView):
     template_name = "quiz_app/results.html"
     def get_context_data(self, **kwargs):
         results = QuizRecord.objects.filter(user=self.request.user, quiz__end_date__lt=timezone.now())
@@ -139,7 +143,7 @@ class Results(TemplateView):
         }
         return context
 
-class QuizResult(TemplateView):
+class QuizResult(LoginRequiredMixin ,TemplateView):
     template_name = "quiz_app/quiz_result.html"
     def get_context_data(self, **kwargs):
         context = {}
@@ -178,6 +182,7 @@ class QuizResult(TemplateView):
 
         return context
 
+@login_required
 def end_quiz(request, quiz_id):
     try:
         quiz_id = uuid.UUID(quiz_id).hex
