@@ -1,7 +1,7 @@
 # Quiz Web Application (Django)
 
 ### Hello everyone,
-I'm glad to share that I have completed a [Quiz Application Project](https://github.com/samyakjain101/quiz) in collaboration with [Samarth Paliwal](https://github.com/RamSamarthPaliwal) (@RamSamarthPaliwal).
+I'm glad to share that I have completed a [Quiz Application Project](https://github.com/samyakjain101/quiz) in collaboration with [Samarth Paliwal](https://github.com/paliwalsamarth) (@paliwalsamarth).
 
 ## Demo
 
